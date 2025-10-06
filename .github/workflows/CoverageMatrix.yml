@@ -26,66 +26,81 @@ jobs:
       SOLUTION_DIR: ${{ github.workspace }}/CoverageValue
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+      
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Run ${{ matrix.category }} tests with coverage
+        shell: pwsh
+        run: |
+          $projectDir  = "tests/${{ matrix.project }}"
+          $projectPath = Join-Path $projectDir "${{ matrix.project }}.csproj"
+          
+          $coverletOutputPath = Join-Path $projectDir "coverage-results"
+          $localOutputXml = Join-Path $coverletOutputPath "${{ matrix.project }}.xml"
+
+          New-Item -ItemType Directory -Force -Path $coverletOutputPath | Out-Null
+
+          dotnet test $projectPath `
+            /p:CollectCoverage=true `
+            /p:CoverletOutputFormat=opencover `
+            "/p:CoverletOutput=$localOutputXml"
+      
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.category }}
+          path: tests/${{ matrix.project }}/coverage-results/${{ matrix.project }}.xml
+          rename-to: ${{ matrix.category }}.xml
+  
+  report:
+    runs-on: windows-latest
+    needs: coverage
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 8.0.x
 
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Create coverage-results folder
-        run: mkdir -p "$SOLUTION_DIR/coverage-results"
-        shell: bash
-
-      - name: Run ${{ matrix.category }} tests with coverage
-        shell: pwsh
-        run: |
-            $projectDir  = "tests/${{ matrix.project }}"
-            $projectPath = "$projectDir/${{ matrix.project }}.csproj"
-            $localOutput = "$projectDir/coverage-results/${{ matrix.project }}.xml"
-            $finalOutput = "$env:SOLUTION_DIR/coverage-results/${{ matrix.category }}.xml"
-
-            New-Item -ItemType Directory -Force -Path "$projectDir/coverage-results" | Out-Null
-
-            dotnet test $projectPath `
-              /p:CollectCoverage=true `
-              /p:CoverletOutputFormat=opencover `
-              /p:CoverletOutput="coverage-results/${{ matrix.project }}.xml"
-
-            Copy-Item $localOutput $finalOutput -Force
-
-      - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-${{ matrix.category }}
-          path: ${{ env.SOLUTION_DIR }}/coverage-results/${{ matrix.category }}.xml
-  
-  report:
-    runs-on: windows-latest
-    needs: coverage
-    env:
-      SOLUTION_DIR: ${{ github.workspace }}/CoverageValue
-    steps:
-      - uses: actions/checkout@v4
-
       - name: Download all coverage artifacts
         uses: actions/download-artifact@v4
         with:
-          path: ${{ env.SOLUTION_DIR }}/coverage-results
+          path: coverage-results
 
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
       - name: Generate merged report
-        shell: bash
+        shell: pwsh
         run: |
-          reportgenerator \
-            -reports:"$SOLUTION_DIR/coverage-results/*.xml" \
-            -targetdir:"$SOLUTION_DIR/coverage-report" \
-            -reporttypes:TextSummary,lcov
+          reportgenerator `
+            "-reports:coverage-results/**/*.xml" `
+            "-targetdir:coverage-report" `
+            "-reporttypes:TextSummary;lcov"
 
-      - name: Show coverage summary
-        run: type "$SOLUTION_DIR/coverage-report/Summary.txt"
+      - name: Show coverage summary in log
+        shell: pwsh
+        run: |
+          Write-Host "--- Coverage Summary ---"
+          Get-Content "coverage-report/Summary.txt"
+          Write-Host "------------------------"
+
