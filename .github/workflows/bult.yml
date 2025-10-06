@@ -1,0 +1,49 @@
+name: CoverageAll
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0
+
+      - name: Install ReportGenerator
+        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+      - name: Restore dependencies
+        run: dotnet restore CoverageValue.sln
+
+      - name: Build solution
+        run: dotnet build CoverageValue.sln --no-restore --configuration Release
+
+      - name: Run all tests with coverage
+        run: dotnet test CoverageValue.sln /p:CollectCoverage=true /p:CoverletOutputFormat=lcov
+
+      - name: Merge all coverage reports
+        run: |
+          files=$(ls coverage-results/CoverageValue.*.info | tr '\n' ' ')
+          dotnet coverage merge $files -f lcov -o coverage-results/merged-all.info
+
+      - name: Generate TextSummary
+        run: |
+          reportgenerator \
+            -reports:coverage-results/merged-all.info \
+            -targetdir:coverage-report \
+            -reporttypes:TextSummary
+
+      - name: Display overall coverage
+        run: cat coverage-report/Summary.txt
