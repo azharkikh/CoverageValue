@@ -1,0 +1,15 @@
+<Project>
+	<PropertyGroup>
+		<NUnitVersion>4.4.0</NUnitVersion>
+		<CoverletVersion>6.0.4</CoverletVersion>
+		<NUnitAdapterVersion>5.1.0</NUnitAdapterVersion>
+		<TargetFramework>net8.0</TargetFramework>
+		<LangVersion>12.0</LangVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="NUnit" Version="$(NUnitVersion)" />
+		<PackageReference Include="coverlet.msbuild" Version="$(CoverletVersion)" />
+		<PackageReference Include="NUnit3TestAdapter" Version="$(NUnitAdapterVersion)" />
+	</ItemGroup>
+</Project>
