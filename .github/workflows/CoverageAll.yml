@@ -2,47 +2,42 @@ name: CoverageAll
 
 on:
   push:
-    branches:
-      - master
+    branches: [master, main]
   pull_request:
-    branches:
-      - master
 
 jobs:
   coverage:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 8.0
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
 
-      - name: Install ReportGenerator
-        run: dotnet tool install -g dotnet-reportgenerator-globaltool
+    - name: Install ReportGenerator
+      run: dotnet tool install -g dotnet-reportgenerator-globaltool
 
-      - name: Restore dependencies
-        run: dotnet restore CoverageValue.sln
+    - name: Add .NET tools to PATH
+      run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
 
-      - name: Build solution
-        run: dotnet build CoverageValue.sln --no-restore --configuration Release
+    - name: Restore dependencies
+      run: dotnet restore
 
-      - name: Run all tests with coverage
-        run: |
-          dotnet test CoverageValue.sln \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=lcov \
-            /p:CoverletOutput=coverage-results/coverage.info
+    - name: Run tests with coverage
+      run: |
+        mkdir -p coverage-results
+        dotnet test CoverageValue.sln
 
-      - name: Generate TextSummary
-        run: |
-          reportgenerator \
-            -reports:coverage-results/coverage.info \
-            -targetdir:coverage-report \
-            -reporttypes:TextSummary
+    - name: Generate aggregated coverage report
+      run: |
+        reportgenerator \
+          -reports:coverage-results/CoverageValue.*.json \
+          -targetdir:coverage-report \
+          -reporttypes:TextSummary,lcov
 
-      - name: Display overall coverage
-        run: cat coverage-report/Summary.txt
+    - name: Show overall coverage
+      run: cat coverage-report/Summary.txt
