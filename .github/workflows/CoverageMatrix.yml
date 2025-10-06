@@ -16,11 +16,11 @@ jobs:
       matrix:
         include:
           - category: unit
-            project: CoverageValue.Unit.Tests\CoverageValue.Unit.Tests.csproj
+            project: CoverageValue.Unit.Tests
           - category: component
-            project: CoverageValue.Component.Tests\CoverageValue.Component.Tests.csproj
+            project: CoverageValue.Component.Tests
           - category: integration
-            project: CoverageValue.Integration.Tests\CoverageValue.Integration.Tests.csproj
+            project: CoverageValue.Integration.Tests
 
     env:
       SOLUTION_DIR: ${{ github.workspace }}/CoverageValue
@@ -49,7 +49,7 @@ jobs:
             dotnet test "${{ matrix.project }}" `
             /p:CollectCoverage=true `
             /p:CoverletOutputFormat=opencover `
-            /p:CoverletOutput="$SOLUTION_DIR/coverage-results/component.xml"
+            /p:CoverletOutput="$SOLUTION_DIR/coverage-results/${{ matrix.project }}.xml"
 
       - name: Generate merged report
         shell: bash
