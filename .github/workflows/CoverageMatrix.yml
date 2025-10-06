@@ -44,12 +44,19 @@ jobs:
         shell: bash
 
       - name: Run ${{ matrix.category }} tests with coverage
-        shell: pwsh
+        shell: bash
         run: |
-            dotnet test tests/"${{ matrix.project }}" `
-            /p:CollectCoverage=true `
-            /p:CoverletOutputFormat=opencover `
-            /p:CoverletOutput="$SOLUTION_DIR/coverage-results/${{ matrix.project }}.xml"
+          PROJECT_DIR="$SOLUTION_DIR/tests/${{ matrix.project }}"
+          # Путь для Coverlet относительно проекта
+          COVERLET_OUTPUT="$PROJECT_DIR/${{ matrix.category }}.xml"
+          
+          dotnet test "$PROJECT_DIR" \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput="$COVERLET_OUTPUT"
+
+          # Скопировать отчет в общую папку решения
+          cp "$COVERLET_OUTPUT" "$SOLUTION_DIR/coverage-results/${{ matrix.category }}.xml"
 
       - name: Generate merged report
         shell: bash
@@ -60,4 +67,5 @@ jobs:
             -reporttypes:TextSummary,lcov
 
       - name: Show coverage summary
-        run: type "$SOLUTION_DIR/coverage-report/Summary.txt"
+        shell: bash
+        run: cat "$SOLUTION_DIR/coverage-report/Summary.txt"
