@@ -16,7 +16,7 @@ public class Tests : WebApplicationFactory<Program>
     [Test]
     public async Task GetForecast_MustReturn()
     {
-        var forecast = await _httpClient.GetAsync("WeatherForecast");
+        var forecast = await _httpClient.GetAsync("/WeatherForecast/GetWeatherForecast");
         Assert.That(forecast.IsSuccessStatusCode);
     }
 }

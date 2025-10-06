@@ -11,7 +11,13 @@ namespace CoverageValue.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         ];
 
-        [HttpGet(Name = "GetWeatherForecast")]
+        [HttpGet("Hello")]
+        public IActionResult Hello()
+        {
+            return Ok("Hello");
+        }
+
+        [HttpGet("GetWeatherForecast")]
         public IEnumerable<WeatherForecast> Get()
         {
             logger.LogInformation("Getting forecast");
