@@ -1,0 +1,64 @@
+name: CoverageMatrix
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  coverage:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - category: unit
+            project: CoverageValue.Unit.Tests.csproj
+          - category: component
+            project: CoverageValue.Component.Tests.csproj
+          - category: integration
+            project: CoverageValue.Integration.Tests.csproj
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set solution root
+        id: sln-root
+        run: echo "SOLUTION_DIR=$(pwd)" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+        shell: bash
+
+      - name: Restore dependencies
+        run: dotnet restore
+        shell: bash
+
+      - name: Run ${{ matrix.category }} tests with coverage
+        run: |
+          mkdir -p $SOLUTION_DIR/coverage-results
+          dotnet test ${{ matrix.project }} \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput=$SOLUTION_DIR/coverage-results/${{ matrix.category }}.xml
+        shell: bash
+
+      - name: Generate combined coverage report
+        run: |
+          reportgenerator \
+            -reports:$SOLUTION_DIR/coverage-results/*.xml \
+            -targetdir:$SOLUTION_DIR/coverage-report \
+            -reporttypes:TextSummary,lcov
+        shell: bash
+
+      - name: Show coverage summary
+        run: type coverage-report/Summary.txt
