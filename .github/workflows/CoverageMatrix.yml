@@ -44,19 +44,18 @@ jobs:
         shell: bash
 
       - name: Run ${{ matrix.category }} tests with coverage
-        shell: bash
+        shell: pwsh
         run: |
-          PROJECT_DIR="$SOLUTION_DIR/tests/${{ matrix.project }}"
-          # Путь для Coverlet относительно проекта
-          COVERLET_OUTPUT="$PROJECT_DIR/${{ matrix.category }}.xml"
-          
-          dotnet test "$PROJECT_DIR" \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput="$COVERLET_OUTPUT"
+            $projectPath = "tests/${{ matrix.project }}/${{ matrix.project }}.csproj"
+            $testOutput  = "tests/${{ matrix.project }}/coverage-results/${{ matrix.project }}.xml"
+            $finalOutput = "$env:SOLUTION_DIR/coverage-results/${{ matrix.category }}.xml"
 
-          # Скопировать отчет в общую папку решения
-          cp "$COVERLET_OUTPUT" "$SOLUTION_DIR/coverage-results/${{ matrix.category }}.xml"
+            dotnet test $projectPath `
+            /p:CollectCoverage=true `
+            /p:CoverletOutputFormat=opencover `
+            /p:CoverletOutput="coverage-results/${{ matrix.project }}.xml"
+
+            Copy-Item $testOutput $finalOutput -Force
 
       - name: Generate merged report
         shell: bash
