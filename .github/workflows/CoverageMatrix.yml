@@ -43,9 +43,12 @@ jobs:
         run: dotnet restore
         shell: bash
 
+      - name: Create coverage-results directory
+        run: mkdir -p coverage-results
+        shell: bash
+
       - name: Run ${{ matrix.category }} tests with coverage
         run: |
-          mkdir -p $SOLUTION_DIR/coverage-results
           dotnet test ${{ matrix.project }} \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
