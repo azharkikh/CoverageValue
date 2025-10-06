@@ -5,14 +5,12 @@ on:
     branches:
       - master
   pull_request:
+    branches:
+      - master
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        dotnet-version: [8.0]
 
     steps:
     - name: Checkout code
@@ -21,7 +19,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: ${{ matrix.dotnet-version }}
+        dotnet-version: 8.0
 
     - name: Install ReportGenerator
       run: dotnet tool install -g dotnet-reportgenerator-globaltool
@@ -32,32 +30,54 @@ jobs:
     - name: Build solution
       run: dotnet build CoverageValue.sln --no-restore --configuration Release
 
+    # ------------------ Unit Tests ------------------
     - name: Run Unit Tests with coverage
       run: |
         dotnet test CoverageValue.Unit.Tests/CoverageValue.Unit.Tests.csproj \
           /p:CollectCoverage=true \
-          /p:CoverletOutputFormat=cobertura \
-          /p:CoverletOutput=coverage/unit.xml
+          /p:CoverletOutputFormat=lcov \
+          /p:CoverletOutput=coverage-results/unit.info
 
+    # ------------------ Component Tests ------------------
     - name: Run Component Tests with coverage
       run: |
         dotnet test CoverageValue.Component.Tests/CoverageValue.Component.Tests.csproj \
           /p:CollectCoverage=true \
-          /p:CoverletOutputFormat=cobertura \
-          /p:CoverletOutput=coverage/component.xml \
-          /p:MergeWith=coverage/unit.xml
+          /p:CoverletOutputFormat=lcov \
+          /p:CoverletOutput=coverage-results/component.info
 
+    - name: Merge Unit + Component coverage
+      run: |
+        mv coverage-results/unit.info coverage-results/merged.info
+        dotnet coverage merge coverage-results/merged.info coverage-results/component.info -f lcov -o coverage-results/merged.info
+
+    # ------------------ Integration Tests ------------------
     - name: Run Integration Tests with coverage
       run: |
         dotnet test CoverageValue.Integration.Tests/CoverageValue.Integration.Tests.csproj \
           /p:CollectCoverage=true \
-          /p:CoverletOutputFormat=cobertura \
-          /p:CoverletOutput=coverage/integration.xml \
-          /p:MergeWith=coverage/unit.xml
+          /p:CoverletOutputFormat=lcov \
+          /p:CoverletOutput=coverage-results/integration.info
 
-    - name: Generate coverage report and summary
+    - name: Merge all coverage
+      run: |
+        dotnet coverage merge coverage-results/merged.info coverage-results/integration.info -f lcov -o coverage-results/merged-all.info
+
+    # ------------------ Generate Report ------------------
+    - name: Generate coverage report
       run: |
         reportgenerator \
-          -reports:coverage/*.xml \
+          -reports:coverage-results/merged-all.info \
           -targetdir:coverage-report \
-          -reporttypes:TextSummary
+          -reporttypes:Html;TextSummary
+
+    # ------------------ Display coverage summary ------------------
+    - name: Display coverage summary
+      run: cat coverage-report/Summary.txt
+
+    # ------------------ Upload coverage report ------------------
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report
+        path: coverage-report/
