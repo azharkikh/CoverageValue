@@ -44,11 +44,12 @@ jobs:
         shell: bash
 
       - name: Run ${{ matrix.category }} tests with coverage
+        shell: pwsh
         run: |
-          dotnet test "${{ matrix.project }}"
-            /p:CollectCoverage=true
-            /p:CoverletOutputFormat="opencover"
-            /p:CoverletOutput="$SOLUTION_DIR/coverage-results/${{ matrix.category }}.xml"
+            dotnet test "${{ matrix.project }}" `
+            /p:CollectCoverage=true `
+            /p:CoverletOutputFormat=opencover `
+            /p:CoverletOutput="$SOLUTION_DIR/coverage-results/component.xml"
 
       - name: Generate merged report
         run: |
