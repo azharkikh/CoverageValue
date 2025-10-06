@@ -35,6 +35,7 @@ jobs:
             -reports:coverage-results/*.xml \
             -targetdir:coverage-report \
             -reporttypes:TextSummary,lcov
+        shell: bash
 
       - name: Show coverage summary
         run: type coverage-report/Summary.txt
