@@ -23,7 +23,7 @@ jobs:
             project: CoverageValue.Integration.Tests\CoverageValue.Integration.Tests.csproj
 
     env:
-      SOLUTION_DIR: ${{ github.workspace }}
+      SOLUTION_DIR: ${{ github.workspace }}/CoverageValue
 
     steps:
       - uses: actions/checkout@v4
