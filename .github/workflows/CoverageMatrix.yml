@@ -22,13 +22,11 @@ jobs:
           - category: integration
             project: CoverageValue.Integration.Tests.csproj
 
+    env:
+      SOLUTION_DIR: ${{ github.workspace }}/CoverageValue
+
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set solution root
-        id: sln-root
-        run: echo "SOLUTION_DIR=$(pwd)" >> $GITHUB_ENV
-        shell: bash
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v3
@@ -37,31 +35,30 @@ jobs:
 
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
-        shell: bash
 
       - name: Restore dependencies
         run: dotnet restore
-        shell: bash
 
-      - name: Create coverage-results directory
-        run: mkdir -p coverage-results
+      - name: Create coverage-results folder
+        run: mkdir -p $SOLUTION_DIR/coverage-results
         shell: bash
 
       - name: Run ${{ matrix.category }} tests with coverage
         run: >
-            dotnet test ${{ matrix.project }}
+          dotnet test ${{ matrix.project }}
             /p:CollectCoverage=true
             /p:CoverletOutputFormat=opencover
             /p:CoverletOutput=$SOLUTION_DIR/coverage-results/${{ matrix.category }}.xml
         shell: bash
 
-      - name: Generate combined coverage report
-        run: |
-          reportgenerator \
-            -reports:$SOLUTION_DIR/coverage-results/*.xml \
-            -targetdir:$SOLUTION_DIR/coverage-report \
+      - name: Generate merged report
+        run: >
+          reportgenerator
+            -reports:$SOLUTION_DIR/coverage-results/*.xml
+            -targetdir:$SOLUTION_DIR/coverage-report
             -reporttypes:TextSummary,lcov
         shell: bash
 
       - name: Show coverage summary
-        run: type coverage-report/Summary.txt
+        run: cat $SOLUTION_DIR/coverage-report/Summary.txt
+        shell: bash
