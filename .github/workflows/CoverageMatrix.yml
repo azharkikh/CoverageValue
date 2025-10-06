@@ -48,10 +48,10 @@ jobs:
         shell: bash
 
       - name: Run ${{ matrix.category }} tests with coverage
-        run: |
-          dotnet test ${{ matrix.project }} \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=opencover \
+        run: >
+            dotnet test ${{ matrix.project }}
+            /p:CollectCoverage=true
+            /p:CoverletOutputFormat=opencover
             /p:CoverletOutput=$SOLUTION_DIR/coverage-results/${{ matrix.category }}.xml
         shell: bash
 
