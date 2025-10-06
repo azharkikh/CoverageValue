@@ -43,24 +43,16 @@ jobs:
         run: mkdir -p "$SOLUTION_DIR/coverage-results"
         shell: bash
 
-      - name: Verify project file exists
-        run: |
-          if [ ! -f "$SOLUTION_DIR/${{ matrix.project }}" ]; then
-            echo "ERROR: Project file not found: $SOLUTION_DIR/${{ matrix.project }}"
-            exit 1
-          fi
-        shell: bash
-
       - name: Run ${{ matrix.category }} tests with coverage
         run: |
-          dotnet test "$SOLUTION_DIR/${{ matrix.project }}" \
+          dotnet test "${{ matrix.project }}" \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
             /p:CoverletOutput="$SOLUTION_DIR/coverage-results/${{ matrix.category }}.xml" \
-            --no-build
+            /p:MergeWith="$SOLUTION_DIR/coverage-results/merged.xml"
         shell: bash
 
-      - name: Merge and generate report
+      - name: Generate merged report
         run: |
           reportgenerator \
             -reports:"$SOLUTION_DIR/coverage-results/*.xml" \
