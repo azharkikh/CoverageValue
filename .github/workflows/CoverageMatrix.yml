@@ -46,7 +46,7 @@ jobs:
       - name: Run ${{ matrix.category }} tests with coverage
         shell: pwsh
         run: |
-            dotnet test "${{ matrix.project }}" `
+            dotnet test tests/"${{ matrix.project }}" `
             /p:CollectCoverage=true `
             /p:CoverletOutputFormat=opencover `
             /p:CoverletOutput="$SOLUTION_DIR/coverage-results/${{ matrix.project }}.xml"
