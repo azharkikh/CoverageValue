@@ -23,7 +23,7 @@ jobs:
             project: CoverageValue.Integration.Tests\CoverageValue.Integration.Tests.csproj
 
     env:
-      SOLUTION_DIR: ${{ github.workspace }}/CoverageValue
+      SOLUTION_DIR: ${{ github.workspace }}
 
     steps:
       - uses: actions/checkout@v4
@@ -51,13 +51,13 @@ jobs:
             /p:CoverletOutputFormat=opencover `
             /p:CoverletOutput="$SOLUTION_DIR/coverage-results/component.xml"
 
-      - name: Generate report
+      - name: Generate merged report
+        shell: bash
         run: |
           reportgenerator \
-            -reports:coverage-results/*.xml \
-            -targetdir:coverage-report \
+            -reports:"$SOLUTION_DIR/coverage-results/*.xml" \
+            -targetdir:"$SOLUTION_DIR/coverage-report" \
             -reporttypes:TextSummary,lcov
-        shell: bash
 
       - name: Show coverage summary
-        run: type coverage-report/Summary.txt
+        run: type "$SOLUTION_DIR/coverage-report/Summary.txt"

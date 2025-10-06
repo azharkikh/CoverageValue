@@ -29,12 +29,12 @@ jobs:
           dotnet test CoverageValue.sln
 
       - name: Generate report
+        shell: bash
         run: |
           reportgenerator \
             -reports:coverage-results/*.xml \
             -targetdir:coverage-report \
             -reporttypes:TextSummary,lcov
-        shell: bash
 
       - name: Show coverage summary
         run: type coverage-report/Summary.txt
