@@ -1,4 +1,4 @@
-name: CoverageAll
+name: CoverageSln
 on:
   push:
     branches:
