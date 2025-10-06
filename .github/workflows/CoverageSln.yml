@@ -26,7 +26,6 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          mkdir coverage-results
           dotnet test CoverageValue.sln
 
       - name: Generate report
