@@ -51,22 +51,21 @@ jobs:
           $projectDir  = "tests/${{ matrix.project }}"
           $projectPath = Join-Path $projectDir "${{ matrix.project }}.csproj"
           
-          $coverletOutputPath = Join-Path $projectDir "coverage-results"
-          $localOutputXml = Join-Path $coverletOutputPath "${{ matrix.project }}.xml"
+          $relativeCoverletOutput = "coverage-results/${{ matrix.project }}.xml"
 
-          New-Item -ItemType Directory -Force -Path $coverletOutputPath | Out-Null
+          $fullCoverletOutputPath = Join-Path $projectDir "coverage-results"
+          New-Item -ItemType Directory -Force -Path $fullCoverletOutputPath | Out-Null
 
           dotnet test $projectPath `
             /p:CollectCoverage=true `
             /p:CoverletOutputFormat=opencover `
-            "/p:CoverletOutput=$localOutputXml"
+            "/p:CoverletOutput=$relativeCoverletOutput"
       
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.category }}
           path: tests/${{ matrix.project }}/coverage-results/${{ matrix.project }}.xml
-          rename-to: ${{ matrix.category }}.xml
   
   report:
     runs-on: windows-latest
