@@ -1,43 +1,40 @@
 name: CoverageAll
-
 on:
   push:
-    branches: [master, main]
+    branches:
+      - master
   pull_request:
+    branches:
+      - master
 
 jobs:
   coverage:
-    runs-on: ubuntu-latest
-
+    runs-on: windows-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v3
-      with:
-        dotnet-version: 8.0.x
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 8.0.x
 
-    - name: Install ReportGenerator
-      run: dotnet tool install -g dotnet-reportgenerator-globaltool
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
-    - name: Add .NET tools to PATH
-      run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+      - name: Restore dependencies
+        run: dotnet restore
 
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Run tests with coverage
+        run: |
+          mkdir coverage-results
+          dotnet test CoverageValue.sln
 
-    - name: Run tests with coverage
-      run: |
-        mkdir -p coverage-results
-        dotnet test CoverageValue.sln
+      - name: Generate report
+        run: |
+          reportgenerator \
+            -reports:coverage-results/*.xml \
+            -targetdir:coverage-report \
+            -reporttypes:TextSummary,lcov
 
-    - name: Generate aggregated coverage report
-      run: |
-        reportgenerator \
-          -reports:coverage-results/CoverageValue.*.json \
-          -targetdir:coverage-report \
-          -reporttypes:TextSummary,lcov
-
-    - name: Show overall coverage
-      run: cat coverage-report/Summary.txt
+      - name: Show coverage summary
+        run: type coverage-report/Summary.txt
