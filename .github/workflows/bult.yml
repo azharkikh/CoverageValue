@@ -30,10 +30,7 @@ jobs:
     - name: Run tests with coverage
       run: |
         mkdir -p coverage-results
-        dotnet test CoverageValue.sln \
-          /p:CollectCoverage=true \
-          /p:CoverletOutputFormat=json \
-          /p:CoverletOutput=coverage-results/$(MSBuildProjectName).json
+        dotnet test CoverageValue.sln
 
     - name: Generate aggregated coverage report
       run: |
