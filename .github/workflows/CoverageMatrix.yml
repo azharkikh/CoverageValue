@@ -33,9 +33,6 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Install ReportGenerator
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool
-
       - name: Restore dependencies
         run: dotnet restore
 
@@ -46,16 +43,41 @@ jobs:
       - name: Run ${{ matrix.category }} tests with coverage
         shell: pwsh
         run: |
-            $projectPath = "tests/${{ matrix.project }}/${{ matrix.project }}.csproj"
-            $testOutput  = "tests/${{ matrix.project }}/coverage-results/${{ matrix.project }}.xml"
+            $projectDir  = "tests/${{ matrix.project }}"
+            $projectPath = "$projectDir/${{ matrix.project }}.csproj"
+            $localOutput = "$projectDir/coverage-results/${{ matrix.project }}.xml"
             $finalOutput = "$env:SOLUTION_DIR/coverage-results/${{ matrix.category }}.xml"
 
-            dotnet test $projectPath `
-            /p:CollectCoverage=true `
-            /p:CoverletOutputFormat=opencover `
-            /p:CoverletOutput="coverage-results/${{ matrix.project }}.xml"
+            New-Item -ItemType Directory -Force -Path "$projectDir/coverage-results" | Out-Null
 
-            Copy-Item $testOutput $finalOutput -Force
+            dotnet test $projectPath `
+              /p:CollectCoverage=true `
+              /p:CoverletOutputFormat=opencover `
+              /p:CoverletOutput="coverage-results/${{ matrix.project }}.xml"
+
+            Copy-Item $localOutput $finalOutput -Force
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.category }}
+          path: ${{ env.SOLUTION_DIR }}/coverage-results/${{ matrix.category }}.xml
+  
+  report:
+    runs-on: windows-latest
+    needs: coverage
+    env:
+      SOLUTION_DIR: ${{ github.workspace }}/CoverageValue
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ env.SOLUTION_DIR }}/coverage-results
+
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
       - name: Generate merged report
         shell: bash
@@ -66,5 +88,4 @@ jobs:
             -reporttypes:TextSummary,lcov
 
       - name: Show coverage summary
-        shell: bash
-        run: cat "$SOLUTION_DIR/coverage-report/Summary.txt"
+        run: type "$SOLUTION_DIR/coverage-report/Summary.txt"
