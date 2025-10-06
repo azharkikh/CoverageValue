@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CoverageValue\CoverageValue.csproj" />
+    <ProjectReference Include="..\..\src\CoverageValue\CoverageValue.csproj" />
   </ItemGroup>
 
 </Project>

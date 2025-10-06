@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.14.36518.9 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoverageValue", "CoverageValue\CoverageValue.csproj", "{B7B5C47D-E986-4624-BB42-B7DCF53344BD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoverageValue", "src\CoverageValue\CoverageValue.csproj", "{B7B5C47D-E986-4624-BB42-B7DCF53344BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoverageValue.Unit.Tests", "CoverageValue.Unit.Tests\CoverageValue.Unit.Tests.csproj", "{D5D2C00D-2948-473E-9E1D-F1171D4B2BFD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoverageValue.Unit.Tests", "tests\CoverageValue.Unit.Tests\CoverageValue.Unit.Tests.csproj", "{D5D2C00D-2948-473E-9E1D-F1171D4B2BFD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoverageValue.Component.Tests", "CoverageValue.Component.Tests\CoverageValue.Component.Tests.csproj", "{305B8C21-2134-402D-A6CE-50D68C9FDEC0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoverageValue.Component.Tests", "tests\CoverageValue.Component.Tests\CoverageValue.Component.Tests.csproj", "{305B8C21-2134-402D-A6CE-50D68C9FDEC0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoverageValue.Integration.Tests", "CoverageValue.Integration.Tests\CoverageValue.Integration.Tests.csproj", "{F2877492-ADE8-4DCF-BD89-AD63DCC31D29}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoverageValue.Integration.Tests", "tests\CoverageValue.Integration.Tests\CoverageValue.Integration.Tests.csproj", "{F2877492-ADE8-4DCF-BD89-AD63DCC31D29}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
