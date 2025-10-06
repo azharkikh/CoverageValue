@@ -22,9 +22,6 @@ jobs:
           - category: integration
             project: CoverageValue.Integration.Tests.csproj
 
-    env:
-      SOLUTION_DIR: ${{ github.workspace }}/CoverageValue
-
     steps:
       - uses: actions/checkout@v4
 
@@ -40,25 +37,25 @@ jobs:
         run: dotnet restore
 
       - name: Create coverage-results folder
-        run: mkdir -p $SOLUTION_DIR/coverage-results
+        run: mkdir -p $GITHUB_WORKSPACE/CoverageValue/coverage-results
         shell: bash
 
       - name: Run ${{ matrix.category }} tests with coverage
         run: |
-            dotnet test ${{ matrix.project }} \
+          dotnet test "$GITHUB_WORKSPACE/CoverageValue/${{ matrix.project }}" \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput=$SOLUTION_DIR/coverage-results/${{ matrix.category }}.xml
+            /p:CoverletOutput="$GITHUB_WORKSPACE/CoverageValue/coverage-results/${{ matrix.category }}.xml"
         shell: bash
 
       - name: Generate merged report
-        run: >
-          reportgenerator
-            -reports:$SOLUTION_DIR/coverage-results/*.xml
-            -targetdir:$SOLUTION_DIR/coverage-report
+        run: |
+          reportgenerator \
+            -reports:$GITHUB_WORKSPACE/CoverageValue/coverage-results/*.xml \
+            -targetdir:$GITHUB_WORKSPACE/CoverageValue/coverage-report \
             -reporttypes:TextSummary,lcov
         shell: bash
 
       - name: Show coverage summary
-        run: cat $SOLUTION_DIR/coverage-report/Summary.txt
+        run: cat $GITHUB_WORKSPACE/CoverageValue/coverage-report/Summary.txt
         shell: bash
