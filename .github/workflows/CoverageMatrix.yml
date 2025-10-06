@@ -51,14 +51,13 @@ jobs:
             /p:CoverletOutputFormat=opencover `
             /p:CoverletOutput="$SOLUTION_DIR/coverage-results/component.xml"
 
-      - name: Generate merged report
+      - name: Generate report
         run: |
           reportgenerator \
-            -reports:"$SOLUTION_DIR/coverage-results/*.xml" \
-            -targetdir:"$SOLUTION_DIR/coverage-report" \
+            -reports:coverage-results/*.xml \
+            -targetdir:coverage-report \
             -reporttypes:TextSummary,lcov
         shell: bash
 
       - name: Show coverage summary
-        run: cat "$SOLUTION_DIR/coverage-report/Summary.txt"
-        shell: bash
+        run: type coverage-report/Summary.txt
