@@ -42,11 +42,11 @@ jobs:
 
       - name: Run ${{ matrix.category }} tests with coverage
         run: |
-          dotnet test "$GITHUB_WORKSPACE/CoverageValue/${{ matrix.project }}" \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput="$GITHUB_WORKSPACE/CoverageValue/coverage-results/${{ matrix.category }}.xml"
-        shell: bash
+            dotnet test %GITHUB_WORKSPACE%\CoverageValue\${{ matrix.project }} ^
+            /p:CollectCoverage=true ^
+            /p:CoverletOutputFormat=opencover ^
+            /p:CoverletOutput=%GITHUB_WORKSPACE%\CoverageValue\coverage-results\${{ matrix.category }}.xml
+        shell: cmd
 
       - name: Generate merged report
         run: |
