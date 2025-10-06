@@ -42,13 +42,13 @@ jobs:
       - name: Create coverage-results folder
         run: mkdir -p $SOLUTION_DIR/coverage-results
         shell: bash
-        
+
       - name: Run ${{ matrix.category }} tests with coverage
         run: |
-            dotnet test "$GITHUB_WORKSPACE/CoverageValue/${{ matrix.project }}" \
+            dotnet test ${{ matrix.project }} \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
-            /p:CoverletOutput="$GITHUB_WORKSPACE/CoverageValue/coverage-results/${{ matrix.category }}.xml"
+            /p:CoverletOutput=$SOLUTION_DIR/coverage-results/${{ matrix.category }}.xml
         shell: bash
 
       - name: Generate merged report
