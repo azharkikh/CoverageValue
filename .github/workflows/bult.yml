@@ -1,0 +1,63 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        dotnet-version: [8.0]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+
+    - name: Install ReportGenerator
+      run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+    - name: Restore dependencies
+      run: dotnet restore CoverageValue.sln
+
+    - name: Build solution
+      run: dotnet build CoverageValue.sln --no-restore --configuration Release
+
+    - name: Run Unit Tests with coverage
+      run: |
+        dotnet test CoverageValue.Unit.Tests/CoverageValue.Unit.Tests.csproj \
+          /p:CollectCoverage=true \
+          /p:CoverletOutputFormat=cobertura \
+          /p:CoverletOutput=coverage/unit.xml
+
+    - name: Run Component Tests with coverage
+      run: |
+        dotnet test CoverageValue.Component.Tests/CoverageValue.Component.Tests.csproj \
+          /p:CollectCoverage=true \
+          /p:CoverletOutputFormat=cobertura \
+          /p:CoverletOutput=coverage/component.xml \
+          /p:MergeWith=coverage/unit.xml
+
+    - name: Run Integration Tests with coverage
+      run: |
+        dotnet test CoverageValue.Integration.Tests/CoverageValue.Integration.Tests.csproj \
+          /p:CollectCoverage=true \
+          /p:CoverletOutputFormat=cobertura \
+          /p:CoverletOutput=coverage/integration.xml \
+          /p:MergeWith=coverage/unit.xml
+
+    - name: Generate coverage report and summary
+      run: |
+        reportgenerator \
+          -reports:coverage/*.xml \
+          -targetdir:coverage-report \
+          -reporttypes:TextSummary
