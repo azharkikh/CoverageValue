@@ -5,9 +5,6 @@
 		<NUnitAdapterVersion>5.1.0</NUnitAdapterVersion>
 		<TargetFramework>net8.0</TargetFramework>
 		<LangVersion>12.0</LangVersion>
-		<CoverletOutput>$(SolutionDir)coverage-results\$(MSBuildProjectName).xml</CoverletOutput>
-		<CoverletOutputFormat>opencover</CoverletOutputFormat>
-		<CollectCoverage>true</CollectCoverage>
 	</PropertyGroup>
 
 	<ItemGroup>

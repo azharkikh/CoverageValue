@@ -1,0 +1,102 @@
+# Имя воркфлоу
+name: Professional .NET CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  # ЗАДАЧА №1: ЗАПУСК ВСЕХ ТИПОВ ТЕСТОВ ПАРАЛЛЕЛЬНО
+  # Эта задача использует матрицу для распараллеливания запусков,
+  # что обеспечивает быструю обратную связь.
+  run-tests:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      # fail-fast: false означает, что падение одного типа тестов
+      # не отменит выполнение остальных.
+      fail-fast: false
+      matrix:
+        include:
+          - category: unit
+            project: CoverageValue.Unit.Tests
+          - category: component
+            project: CoverageValue.Component.Tests
+          - category: integration
+            project: CoverageValue.Integration.Tests
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore CoverageValue.sln
+
+      # Запускаем конкретный тестовый проект из матрицы
+      - name: Run ${{ matrix.category }} tests with coverage
+        run: |
+          dotnet test tests/${{ matrix.project }}/${{ matrix.project }}.csproj \
+            --logger "trx;LogFileName=${{ matrix.project }}.trx" \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=opencover \
+            /p:CoverletOutput="coverage.xml" \
+            /p:Exclude="[*.Tests]*"
+      
+      # Загружаем индивидуальный отчет о покрытии как артефакт
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.category }}
+          path: tests/${{ matrix.project }}/coverage.xml
+
+  # ЗАДАЧА №2: ГЕНЕРАЦИЯ СВОДНОГО ОТЧЕТА
+  # Эта задача запускается только после успешного завершения ВСЕХ тестов
+  generate-report:
+    # 'needs' гарантирует, что эта задача начнется только после
+    # успешного выполнения всех задач из 'run-tests'.
+    needs: run-tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Скачиваем ВСЕ артефакты с покрытием из предыдущей задачи.
+      # Они будут размещены в отдельных подпапках.
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: coverage-results
+
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+
+      # ReportGenerator сам найдет и автоматически объединит все XML-отчеты.
+      - name: Generate merged reports
+        run: |
+          reportgenerator \
+            "-reports:coverage-results/**/*.xml" \
+            "-targetdir:coverage-report" \
+            "-reporttypes:TextSummary;Html"
+
+      - name: Display coverage summary
+        run: |
+          echo "--- Merged Coverage Summary ---"
+          cat coverage-report/Summary.txt
+          echo "-------------------------------"
+          
+      - name: Upload HTML coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: merged-coverage-report-html
+          path: coverage-report
+
