@@ -1,4 +1,5 @@
 name: CoverageSln
+
 on:
   push:
     branches:
@@ -9,7 +10,7 @@ on:
 
 jobs:
   coverage:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
@@ -25,16 +26,23 @@ jobs:
         run: dotnet restore
 
       - name: Run tests with coverage
-        run: |
-          dotnet test CoverageValue.sln
+        run: dotnet test CoverageValue.sln \
+              /p:CollectCoverage=true \
+              /p:CoverletOutputFormat=opencover \
+              /p:CoverletOutput="coverage-results/"
 
       - name: Generate report
         shell: bash
         run: |
+          mkdir -p coverage-report
           reportgenerator \
             -reports:coverage-results/*.xml \
             -targetdir:coverage-report \
             -reporttypes:TextSummary,lcov
 
       - name: Show coverage summary
-        run: type coverage-report/Summary.txt
+        shell: bash
+        run: |
+          echo "--- Coverage Summary ---"
+          cat coverage-report/Summary.txt
+          echo "------------------------"
