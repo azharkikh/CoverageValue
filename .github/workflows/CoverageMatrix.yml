@@ -9,7 +9,7 @@ on:
       - master
 
 jobs:
-  coverage:
+  coveragematrix:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
