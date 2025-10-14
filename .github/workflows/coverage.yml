@@ -1,5 +1,5 @@
 # Имя воркфлоу
-name: Professional .NET CI
+name: Run tests with coverlet
 
 on:
   push:
