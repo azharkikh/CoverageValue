@@ -1,4 +1,4 @@
-name: Run tests with coverlet
+name: Run tests
 
 on:
   push:
