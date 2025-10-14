@@ -38,7 +38,6 @@ jobs:
       - name: Run ${{ matrix.category }} tests with coverage
         run: |
           dotnet test tests/${{ matrix.project }}/ \
-            --logger "trx;LogFileName=${{ matrix.project }}.trx" \
             /p:CollectCoverage=true \
             /p:CoverletOutputFormat=opencover \
             /p:CoverletOutput="coverage.xml" \
