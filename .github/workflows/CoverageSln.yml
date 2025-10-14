@@ -27,9 +27,9 @@ jobs:
 
       - name: Run tests with coverage
         shell: bash
-        run: dotnet test CoverageValue.sln `
-              /p:CollectCoverage=true `
-              /p:CoverletOutputFormat=opencover `
+        run: dotnet test CoverageValue.sln
+              /p:CollectCoverage=true
+              /p:CoverletOutputFormat=opencover
               /p:CoverletOutput="coverage-results/"
 
       - name: Generate report
