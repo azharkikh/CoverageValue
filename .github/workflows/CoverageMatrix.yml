@@ -57,7 +57,7 @@ jobs:
           dotnet test "$projectPath"
             /p:CollectCoverage=true
             /p:CoverletOutputFormat=opencover
-            /p:CoverletOutput="$relativeCoverletOutput"
+            "/p:CoverletOutput=$relativeCoverletOutput"
       
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
