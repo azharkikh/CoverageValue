@@ -65,19 +65,24 @@ jobs:
       - name: Install ReportGenerator
         run: dotnet tool install --global dotnet-reportgenerator-globaltool
 
-      - name: Generate and display reports (GitHub)
+      - name: Generate coverage summary
+        id: report
         run: |
           reportgenerator \
             "-reports:coverage-results/**/*.xml" \
             "-targetdir:coverage-report" \
-            "-reporttypes:TextSummary;Html"
-          echo "--- Merged Coverage Summary ---"
-          cat coverage-report/Summary.txt
-          echo "-------------------------------"
+            "-reporttypes:TextSummary"
           
-      - name: Upload HTML coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: merged-coverage-report-html
-          path: coverage-report
+      - name: Parse and display total line coverage
+        id: coverage_parser
+        run: |
+          COVERAGE_VALUE=$(grep 'Line coverage' coverage-report/Summary.txt | sed 's/.*: //;s/%//')
+          echo "--- Merged Coverage Summary ---"
+          echo "Total Line Coverage: $COVERAGE_VALUE%"
+          echo "-------------------------------"
+          echo "line_coverage_percent=$COVERAGE_VALUE" >> $GITHUB_OUTPUT
+
+      - name: Use the parsed value (Example for future use)
+        run: |
+          echo "The parsed value is ${{ steps.coverage_parser.outputs.line_coverage_percent }}%. This can now be sent to Kusto."
 
