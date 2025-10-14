@@ -54,10 +54,10 @@ jobs:
 
           mkdir -p "$projectDir/coverage-results"
 
-          dotnet test "$projectPath" \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=opencover \
-            "/p:CoverletOutput=$relativeCoverletOutput"
+          dotnet test "$projectPath"
+            /p:CollectCoverage=true
+            /p:CoverletOutputFormat=opencover
+            /p:CoverletOutput="$relativeCoverletOutput"
       
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
@@ -89,9 +89,9 @@ jobs:
       - name: Generate merged report
         shell: bash
         run: |
-          reportgenerator \
-            "-reports:coverage-results/**/*.xml" \
-            "-targetdir:coverage-report" \
+          reportgenerator
+            "-reports:coverage-results/**/*.xml"
+            "-targetdir:coverage-report"
             "-reporttypes:TextSummary;lcov"
 
       - name: Show coverage summary in log

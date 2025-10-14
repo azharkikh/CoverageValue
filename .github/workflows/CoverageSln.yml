@@ -36,10 +36,10 @@ jobs:
         shell: bash
         run: |
           mkdir -p coverage-report
-          reportgenerator \
-            -reports:coverage-results/*.xml \
-            -targetdir:coverage-report \
-            -reporttypes:TextSummary,lcov
+          reportgenerator
+            "-reports:coverage-results/**/*.xml"
+            "-targetdir:coverage-report"
+            "-reporttypes:TextSummary;lcov"
 
       - name: Show coverage summary
         shell: bash
