@@ -1,4 +1,4 @@
-name: Run tests
+name: Run tests with coverlet
 
 on:
   push:
@@ -16,11 +16,9 @@ jobs:
       matrix:
         include:
           - category: unit
-            project: CoverageValue.Unit.Tests
-			
+            project: CoverageValue.Unit.Tests			
           - category: component
-            project: CoverageValue.Component.Tests
-			
+            project: CoverageValue.Component.Tests			
           - category: integration
             project: CoverageValue.Integration.Tests
 
